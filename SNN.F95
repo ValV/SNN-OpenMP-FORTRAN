@@ -1,4 +1,4 @@
-! This is a simple neural network example
+! This is a simple neural network
 !23456789
 
       MODULE SNN_ROUTINES
@@ -48,6 +48,7 @@
             REAL, DIMENSION(1, 4) :: LAYER_1
             REAL, DIMENSION(1, 4) :: LAYER_1_ERROR
             REAL, DIMENSION(1, 4) :: LAYER_1_DELTA
+            INTEGER :: I
 
             X = RESHAPE((/0, 0, 1, 0,&
                           1, 1, 1, 0,&
@@ -66,8 +67,6 @@
             WRITE (*, *) "Synapse:"
             CALL SNN_PRINT(SYNAPSE_0)
 
-            ! TODO: wrap routines below into a cycle (6-10K iterations)
-
             ! Use BLAS library to mutiply matrices (link with -lblas)
             ! trans A, trans B, rows A & C, cols B & C, cols A & rows B
             ! alpha (A x B), A, N: rows A | cols A, B, N: rows B | cols B
@@ -78,20 +77,42 @@
             !WRITE (*, *) "Multiplication:"
             !CALL SNN_PRINT(LAYER_1)
 
-            LAYER_1 = SNN_SIGMA(MATMUL(SYNAPSE_0, X)) ! X is layer 0
+            ! TODO: wrap routines below into a cycle (6-10K iterations)
+            DO I = 1, 10000
+                  ! Layer 0 -> layer 1
+                  LAYER_1 = SNN_SIGMA(MATMUL(SYNAPSE_0, X)) ! X is layer 0
+                  !WRITE (*, *) "Layer 1 (sigma (layer 0, synapse 0)):"
+                  !CALL SNN_PRINT(LAYER_1)
+
+                  ! Error rate
+                  LAYER_1_ERROR = Y - LAYER_1
+                  !WRITE (*, *) "Layer 1 Error rate:"
+                  !CALL SNN_PRINT(LAYER_1_ERROR)
+
+                  ! Difference
+                  LAYER_1_DELTA = LAYER_1_ERROR * SNN_SIGMA(LAYER_1, .TRUE.)
+                  !WRITE (*, *) "Layer 1 Delta difference:"
+                  !CALL SNN_PRINT(LAYER_1_DELTA)
+
+                  ! Update synapse 0
+                  SYNAPSE_0 = SYNAPSE_0 + MATMUL(LAYER_1_DELTA, TRANSPOSE(X))
+                  !WRITE (*, *) "Synapse 0 updated:"
+                  !CALL SNN_PRINT(SYNAPSE_0)
+
+            END DO
+
+            ! Display results
             WRITE (*, *) "Layer 1 (sigma (layer 0, synapse 0)):"
             CALL SNN_PRINT(LAYER_1)
 
-            LAYER_1_ERROR = Y - LAYER_1
-            WRITE (*, *) "Layer 1 Error rate:"
-            CALL SNN_PRINT(LAYER_1_ERROR)
+            !WRITE (*, *) "Layer 1 Error rate:"
+            !CALL SNN_PRINT(LAYER_1_ERROR)
 
-            LAYER_1_DELTA = LAYER_1_ERROR * SNN_SIGMA(LAYER_1, .TRUE.)
-            WRITE (*, *) "Layer 1 Delta difference:"
-            CALL SNN_PRINT(LAYER_1_DELTA)
+            !WRITE (*, *) "Layer 1 Delta difference:"
+            !CALL SNN_PRINT(LAYER_1_DELTA)
 
-            ! TODO: update synapse 0
-
+            !WRITE (*, *) "Synapse 0 (updated):"
+            !CALL SNN_PRINT(SYNAPSE_0)
 
       END PROGRAM SNN
 
