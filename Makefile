@@ -2,8 +2,8 @@
 # All the sources must have (!) unique names.
 
 CC=gfortran
-FFLAGS=
-LFLAGS=#-L/usr/lib -lblas
+CFLAGS=
+LDFLAGS=-fopenmp#-L/usr/lib -lblas
 BINDIR=BIN
 
 PROG=SNN
@@ -15,11 +15,12 @@ BIN=$(addprefix $(BINDIR)/, $(PROG))
 
 all: $(BIN)
 
-$(BINDIR)/%$(EXT): $(firstword $(filter %, $(SRC))) | $(BINDIR)
-	$(CC) $(FFLAGS) -c -o $@ $<
+$(BINDIR)/%$(EXT): $(SRC) | $(BINDIR)
+#	@echo $(SRC) ":" $(filter $(notdir $(basename, $@))%, $^)
+	$(CC) -c $(CFLAGS) -o $@ $(filter $(notdir $(basename, $@))%, $^)
 
 $(BIN): $(OBJ)
-	$(CC) $(LFLAGS) -o $@ $^
+	$(CC) $(LDFLAGS) -o $@ $^
 
 $(BINDIR):
 	@mkdir -p $(BINDIR)
