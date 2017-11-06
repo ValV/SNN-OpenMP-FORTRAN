@@ -18,7 +18,7 @@
             END SUBROUTINE SNN_PRINT
 
             ! Sigmoid function (also returns derivative)
-            PURE FUNCTION SNN_SIGMA(X, DERIV) RESULT(Y)
+            PURE RECURSIVE FUNCTION SNN_SIGMA(X, DERIV) RESULT(Y)
                   REAL, INTENT(IN) :: X(:, :)
                   LOGICAL, OPTIONAL, INTENT(IN) :: DERIV
                   REAL,& ! Output array has the same dimension as X
@@ -28,8 +28,9 @@
                         ! Return sigmoid
                         Y = 1 / (1 + EXP(-1 * X))
                   ELSE
-                        ! Return derivative
-                        Y = X * (1 - X)
+                        ! Return derivative (sigma(x) * (1 - sigma(x)))
+                        !Y = SNN_SIGMA(X); Y = Y * (1 - Y);
+                        Y = SNN_SIGMA(X) * (1 - SNN_SIGMA(X))
                   END IF
             END FUNCTION SNN_SIGMA
 
@@ -120,7 +121,7 @@
             !WRITE (*, *) "Synapse 0 (updated):"
             !CALL SNN_PRINT(SYNAPSE_0)
 
-            WRITE (*, "(A, 1X, F11.9, 1X, A)"),&
+            WRITE (*, "(A, 1X, F11.9, 1X, A)")&
                    "Loop execution time:", WTIME, "seconds"
 
       END PROGRAM SNN
